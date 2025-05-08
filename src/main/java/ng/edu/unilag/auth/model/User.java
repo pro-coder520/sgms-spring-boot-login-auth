@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.management.relation.Role;
+import ng.edu.unilag.auth.model.Role;
 import java.util.HashSet;
 import java.util.Set;
 
