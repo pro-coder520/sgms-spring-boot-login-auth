@@ -1,11 +1,14 @@
 package ng.edu.unilag.auth.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import ng.edu.unilag.auth.model.Role;
+
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,5 +43,42 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     public void setRoles(Set<ng.edu.unilag.auth.model.Role> roles) {
+    }
+
+    public Collection<Object> getRoles() {
+        return java.util.List.of(roles);
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setPassword(String encode) {
+    }
+
+    public void setFullName(String fullName) {
+    }
+
+    public void setEmail(String email) {
+    }
+
+    public void setUsername(String username) {
     }
 }

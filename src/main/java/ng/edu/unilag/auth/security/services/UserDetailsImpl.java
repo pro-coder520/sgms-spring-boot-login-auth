@@ -2,6 +2,7 @@ package ng.edu.unilag.auth.security.services;
 
 import java.io.Serial;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,22 +15,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import ng.edu.unilag.auth.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+@Getter
 public class UserDetailsImpl implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Getter
     private Long id;
-    private String username;
-    @Getter
+
+    private final String username;
+
     private String email;
-    @Getter
+
     private String fullName;
 
     @JsonIgnore
-    private String password;
+    private final String password;
 
-    private Collection<? extends GrantedAuthority> authorities;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(Long id, String username, String email, String password,
                            String fullName, Collection<? extends GrantedAuthority> authorities) {
@@ -38,12 +40,11 @@ public class UserDetailsImpl implements UserDetails {
         this.email = email;
         this.password = password;
         this.fullName = fullName;
-        this.authorities = authorities;
+        this.authorities = Collections.unmodifiableCollection(authorities);
     }
-
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .map(role -> new SimpleGrantedAuthority(role.getClass().getName()))
                 .collect(Collectors.toList());
 
         return new UserDetailsImpl(
@@ -92,11 +93,42 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public void setFullName() {
+        this.fullName = fullName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Object setEmail() {
+        return email;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId() {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getFullName() {
+        return fullName;
     }
 }
