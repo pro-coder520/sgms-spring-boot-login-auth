@@ -24,12 +24,14 @@ public class DataSourceConfig {
 
         SQLiteConfig sqLiteConfig = new SQLiteConfig();
         sqLiteConfig.setReadOnly(false);
+        sqLiteConfig.enforceForeignKeys(true); // Enable foreign key support
 
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + dbPath);
+        config.setJdbcUrl("jdbc:sqlite:" + dbPath + "?journal_mode=WAL");
         config.setDataSourceProperties(sqLiteConfig.toProperties());
 
-        config.setMaximumPoolSize(10);
+        // SQLite works best with a single connection
+        config.setMaximumPoolSize(1);
         config.setPoolName("SQLiteHikariCP");
 
         return new HikariDataSource(config);
@@ -39,20 +41,21 @@ public class DataSourceConfig {
         Path path = Paths.get(dbPath);
         File dbFile = path.toFile();
 
-        //To check if the file exists
-        if (!dbFile.exists()) {
+        // Check parent directory
+        Path parentDir = path.getParent();
+        if (parentDir != null && !Files.exists(parentDir)) {
             try {
-                Files.createDirectories(path.getParent()); // Creates parent directories if not found
-                dbFile.createNewFile(); // To create a new file if not found
+                Files.createDirectories(parentDir);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to create database file: " + dbPath, e);
+                throw new RuntimeException("Unable to create parent directories for database file: " + dbPath, e);
             }
         }
 
-        if (!dbFile.canRead() || !dbFile.canWrite()) {
-            throw new RuntimeException("Database file is neither readable nor writable" + dbPath);
+        // Check file permissions if the file exists
+        if (dbFile.exists()) {
+            if (!dbFile.canRead() || !dbFile.canWrite()) {
+                throw new RuntimeException("Database file is neither readable nor writable: " + dbPath);
+            }
         }
     }
 }
-
-
